@@ -1,14 +1,15 @@
 [package]
+# Modified for fraternity-z/fastctx: CodeyX maintenance metadata.
 name = "fastctx"
 version = "0.2.6"
 edition = "2024"
 rust-version = "1.88"
-description = "FastCtx — fast, context-efficient repository tools for AI agents."
-authors = ["yc-duan <dy2958830371@gmail.com>"]
+description = "FastCtx — repository tools independently maintained for CodeyX."
+authors = ["yc-duan <dy2958830371@gmail.com>", "fraternity-z"]
 license = "Apache-2.0"
-repository = "https://github.com/yc-duan/fastctx"
+repository = "https://github.com/fraternity-z/fastctx"
 readme = "README.md"
-documentation = "https://docs.rs/fastctx"
+documentation = "https://github.com/fraternity-z/fastctx#readme"
 keywords = ["mcp", "codex", "ripgrep", "filesystem"]
 categories = ["command-line-utilities", "development-tools"]
 include = [

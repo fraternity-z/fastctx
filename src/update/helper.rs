@@ -1,4 +1,5 @@
 //! Copied updater helper, verified installation, rollback, restart, and finalization.
+//! Modified for fraternity-z/fastctx: restrict release updates to the maintained repository.
 
 use super::model::{
     NPMMIRROR_REGISTRY, NpmDriver, NpmMode, NpmProvenance, NpmVersionAuthority,
@@ -1320,7 +1321,8 @@ fn validate_plan(plan: &UpdatePlan) -> Result<(), String> {
             }
             validate_release_url(archive_url)?;
             validate_release_url(checksums_url)?;
-            let base = format!("https://github.com/yc-duan/fastctx/releases/download/v{target}");
+            let base =
+                format!("https://github.com/fraternity-z/fastctx/releases/download/v{target}");
             if archive_url != &format!("{base}/{archive_name}")
                 || checksums_url != &format!("{base}/SHA256SUMS")
             {
@@ -1614,9 +1616,9 @@ fn validate_release_url(value: &str) -> Result<(), String> {
         || url.host_str() != Some("github.com")
         || !url
             .path()
-            .starts_with("/yc-duan/fastctx/releases/download/")
+            .starts_with("/fraternity-z/fastctx/releases/download/")
     {
-        return Err("release URL is outside yc-duan/fastctx".to_string());
+        return Err("release URL is outside fraternity-z/fastctx".to_string());
     }
     Ok(())
 }
@@ -1626,7 +1628,7 @@ fn validate_download_response_url(value: &str) -> Result<(), String> {
     let allowed = match url.host_str() {
         Some("github.com") => url
             .path()
-            .starts_with("/yc-duan/fastctx/releases/download/"),
+            .starts_with("/fraternity-z/fastctx/releases/download/"),
         Some("release-assets.githubusercontent.com" | "objects.githubusercontent.com") => true,
         _ => false,
     };
@@ -1765,6 +1767,47 @@ mod tests {
     };
     use crate::update::model::{NpmDriver, OFFICIAL_NPM_REGISTRY, UpdatePlan};
     use std::io::{Cursor, Write};
+
+    #[test]
+    fn release_downloads_reject_upstream_and_untrusted_repositories() {
+        let owned =
+            "https://github.com/fraternity-z/fastctx/releases/download/v99.88.77/SHA256SUMS";
+        super::validate_release_url(owned).unwrap();
+        super::validate_download_response_url(owned).unwrap();
+        for url in [
+            "https://github.com/yc-duan/fastctx/releases/download/v99.88.77/SHA256SUMS",
+            "https://github.com/fraternity-z/fastctx-other/releases/download/v99.88.77/SHA256SUMS",
+            "http://github.com/fraternity-z/fastctx/releases/download/v99.88.77/SHA256SUMS",
+            "https://github.com.example.com/fraternity-z/fastctx/releases/download/v99.88.77/SHA256SUMS",
+        ] {
+            assert!(super::validate_release_url(url).is_err(), "{url}");
+            assert!(super::validate_download_response_url(url).is_err(), "{url}");
+        }
+        super::validate_download_response_url(
+            "https://release-assets.githubusercontent.com/github-production-release-asset/fixture",
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn release_plans_require_the_owned_exact_tag_and_archive() {
+        let Some(archive_name) = super::expected_release_archive_name() else {
+            return;
+        };
+        let plan = |owner: &str, tag: &str| UpdatePlan::GithubRelease {
+            target_version: "99.88.77".to_string(),
+            archive_name: archive_name.to_string(),
+            archive_url: format!(
+                "https://github.com/{owner}/fastctx/releases/download/{tag}/{archive_name}"
+            ),
+            checksums_url: format!(
+                "https://github.com/{owner}/fastctx/releases/download/{tag}/SHA256SUMS"
+            ),
+        };
+        super::validate_plan(&plan("fraternity-z", "v99.88.77")).unwrap();
+        assert!(super::validate_plan(&plan("yc-duan", "v99.88.77")).is_err());
+        assert!(super::validate_plan(&plan("fraternity-z", "v99.88.76")).is_err());
+    }
 
     /// Hand-written v0.1.1 (schema 2) npm request: independent of the current
     /// serializers, with no `driver` key in the provenance.

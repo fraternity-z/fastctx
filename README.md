@@ -2,7 +2,9 @@
 
 **English** | [简体中文](./README.zh-CN.md)
 
-### Fast, context-efficient repository tools for AI agents.
+### Repository tools designed for CodeyX.
+
+This version and its documentation are independently maintained by [fraternity-z](https://github.com/fraternity-z/fastctx) specifically for CodeyX. It is derived from [yc-duan/fastctx](https://github.com/yc-duan/fastctx), with upstream attribution and Apache-2.0 licensing preserved. Development focuses on CodeyX integration and local file-reading performance.
 
 FastCtx is a local Rust tool runtime. It provides file reading, content search, file discovery, batch replacement, and Bash command execution through MCP.
 
@@ -13,11 +15,10 @@ Each `fastctx serve` process is a thin stdio proxy. Proxies for the same user an
 An MCP session ends when its host ends it, never because the shared runtime had a problem. If the control center becomes unreachable, the proxy answers the calls it can no longer complete with an explicit error, reconnects to a replacement — starting one, or running the engine inside the proxy itself — and carries on over the same stdio transport. Side-effecting calls are never replayed. The control center itself stays resident while any host process that used it is still running, and exits ten minutes after the last of them is gone, with no connection, no active request, and no running background job.
 
 ```console
-npm install --global fastctx
-fastctx
+cargo install --git https://github.com/fraternity-z/fastctx.git --branch main --locked
 ```
 
-The `fastctx` command opens the control terminal. Review the proposed changes, select **Connect to Codex**, then start a new ChatGPT / Codex session.
+The command above builds this maintained source version. Its GitHub Release updater uses only this repository; source installs do not self-update. Report issues and propose changes in [this repository](https://github.com/fraternity-z/fastctx/issues).
 
 FastCtx currently provides first-class setup for ChatGPT App and Codex CLI. Any MCP client can also register `fastctx serve` directly.
 
@@ -39,7 +40,9 @@ The tools cover the main parts of a coding task:
 
 This greatly reduces the attention the model spends on tool mechanics, such as checking whether a PowerShell command is correct. It improves context efficiency and helps tasks finish faster with better results.
 
-## Installation
+## Upstream CLI installation reference
+
+The following standalone CLI instructions are retained from upstream. The npm and crates.io packages install upstream releases, whose update channels also remain upstream. Use the source command above to build this CodeyX version.
 
 ### Install with npm
 
@@ -64,7 +67,7 @@ Connecting copies the current binary to `~/.fastctx/bin/` and points the host co
 
 On launch, FastCtx checks its launch channel for updates before the main menu opens. A brief checking screen appears and the wait is strictly bounded: if the check cannot finish — offline, timeout, rate limiting — FastCtx enters silently, and the dedicated **Update** screen still offers a manual check at any time. When a newer version is installable, the update screen opens directly and asks whether to **Update & restart** or **Continue** into the current version. Successful results are cached for 24 hours in machine-private storage outside `~/.fastctx`, so most launches skip the network entirely. npm launches query the exact launcher package through a fresh isolated cache with `--prefer-online`; direct GitHub Release executables read the stable tag from GitHub's `releases/latest` web redirect.
 
-If GitHub has published a release but npm has not exposed the matching version yet, FastCtx shows a propagation screen instead of trusting stale metadata. **Retry** always uses another isolated cache; it never clears or mutates the user's normal npm cache. Transient network or rate-limit failures stay quiet and are recorded under **Status**; malformed publication metadata produces one warning. Status also offers a manual check that bypasses the 24-hour TTL. An accepted npm update installs the exact version with lifecycle scripts disabled. A GitHub Release update downloads this repository's platform archive and aggregate `SHA256SUMS`, verifies the archive before safely extracting the binary, probes the downloaded version, replaces the executable atomically, and rolls back when restart health fails. A failed npm update restores the exact previous package version; every failed update reopens the previous TUI with a warning. After a successful restart, the owned `~/.fastctx/bin/` copy is synchronized; externally changed copies are left untouched. Restart Codex after an update so existing sessions and their build-isolated control center are replaced by the new build.
+If GitHub has published a release but npm has not exposed the matching version yet, FastCtx shows a propagation screen instead of trusting stale metadata. **Retry** always uses another isolated cache; it never clears or mutates the user's normal npm cache. Transient network or rate-limit failures stay quiet and are recorded under **Status**; malformed publication metadata produces one warning. Status also offers a manual check that bypasses the 24-hour TTL. An accepted npm update installs the exact version with lifecycle scripts disabled. The upstream CLI's GitHub Release update downloads the upstream project's platform archive and aggregate `SHA256SUMS`, verifies the archive before safely extracting the binary, probes the downloaded version, replaces the executable atomically, and rolls back when restart health fails. A failed npm update restores the exact previous package version; every failed update reopens the previous TUI with a warning. After a successful restart, the owned `~/.fastctx/bin/` copy is synchronized; externally changed copies are left untouched. Restart Codex after an update so existing sessions and their build-isolated control center are replaced by the new build.
 
 `cargo install` builds and the internal `~/.fastctx/bin/` runtime are not self-updated. Set `FASTCTX_DISABLE_UPDATE_CHECK=1` to disable the TUI startup check.
 
@@ -426,13 +429,13 @@ FastCtx edits existing TOML with `toml_edit`, preserving comments, formatting, a
 
 FastCtx is licensed under the Apache License 2.0.
 
-If you redistribute FastCtx, bundle it into another product, or build on top of it, Section 4(d) requires you to reproduce the attribution notice in [`NOTICE`](./NOTICE) wherever third-party notices normally appear — for a source repository, that means your README. That notice credits https://github.com/yc-duan/fastctx and states that your changes are your own work and your sole responsibility, carrying no endorsement or liability from this project's author. Section 4(b) separately requires files you modified to carry prominent notices that you changed them.
+The original FastCtx is Copyright (c) 2026 yc-duan and is used under Apache-2.0. Its attribution and disclaimer are preserved in [`NOTICE`](./NOTICE); changes in this distribution are the maintainer's own responsibility and are not endorsed or supported by the upstream author. Redistributions must preserve the applicable license and notices, and modified files must carry prominent notices of their changes.
 
 Third-party notices for the bundled Pdfium build are listed in [`THIRD_PARTY_LICENSES.md`](./THIRD_PARTY_LICENSES.md).
 
 ## Contact
 
-FastCtx is created and maintained by [yc-duan](https://github.com/yc-duan). For integration, redistribution, partnership, or anything else, feel free to reach out: dy2958830371@gmail.com.
+For this CodeyX version, contact [fraternity-z through this repository](https://github.com/fraternity-z/fastctx/issues). The original FastCtx project was created by [yc-duan](https://github.com/yc-duan).
 
 ## Acknowledgements
 

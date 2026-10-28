@@ -2,7 +2,9 @@
 
 [English](./README.md) | **简体中文**
 
-### 面向 AI 智能体的快速、上下文高效的仓库工具。
+### 专为 CodeyX 设计的仓库工具。
+
+本版本及文档由 [fraternity-z](https://github.com/fraternity-z/fastctx) 独立维护，专门服务于 CodeyX。项目衍生自 [yc-duan/fastctx](https://github.com/yc-duan/fastctx)，保留上游署名与 Apache-2.0 许可，重点维护 CodeyX 集成和本地文件读取性能。
 
 FastCtx 是一个纯本地的 Rust 工具运行时，通过 MCP 提供文件读取、内容搜索、文件查找、批量替换和 Bash 命令执行能力。
 
@@ -13,11 +15,10 @@ FastCtx 是一个纯本地的 Rust 工具运行时，通过 MCP 提供文件读�
 MCP 会话只由宿主结束，不会因为共享运行时出问题而中断。控制中心不可达时，代理会把无法完成的调用逐条显式报错，再连上一个替代引擎（新拉起一个，或直接在代理自己进程内运行），并在同一条 stdio 通道上继续工作；有副作用的调用绝不重放。控制中心自身则在用过它的宿主进程还活着时一直驻留，等最后一个宿主退出、且没有连接、没有在执行的请求、没有运行中的后台任务之后，再过十分钟退出。
 
 ```console
-npm install --global fastctx
-fastctx
+cargo install --git https://github.com/fraternity-z/fastctx.git --branch main --locked
 ```
 
-`fastctx` 命令会打开控制终端。检查变更后选择 **接入 Codex**，再启动新的 ChatGPT / Codex 会话即可使用。
+上面的命令从源码构建本维护版本。本版本的 GitHub Release 更新器仅使用本仓库发布，源码安装不会自行更新。问题反馈和改进建议请提交到[本仓库](https://github.com/fraternity-z/fastctx/issues)。
 
 当前优先支持 ChatGPT App 与 Codex CLI。任何 MCP client 也可以直接注册 `fastctx serve`。
 
@@ -39,7 +40,9 @@ FastCtx 将常见仓库操作整理成结构化输入输出。模型提供路径
 
 这能极大减轻模型对工具本身的注意力负担（比如关注在处理 PowerShell 命令正确性上），提高上下文有效性，提高任务完成速度和质量。
 
-## 安装
+## 上游 CLI 安装参考
+
+以下保留上游独立 CLI 的使用说明。npm 包和 crates.io 包安装的是上游发布版本，其更新渠道也仍属于上游；构建本仓库的 CodeyX 版本请使用上面的源码命令。
 
 ### 使用 npm 安装
 
@@ -64,7 +67,7 @@ fastctx
 
 启动时，FastCtx 会先按本次启动来源检查更新，然后才进入主菜单。检查期间显示一个简短的检查画面，等待时间有严格上限：若检查无法完成——离线、超时、限流——FastCtx 会静默进入，独立的 **更新** 界面随时提供手动检查。检测到可安装的新版本时，会直接打开更新界面询问：**更新并重启**，或 **继续使用** 当前版本。成功结果会在 `~/.fastctx` 之外的机器级私有存储中缓存 24 小时，因此多数启动完全不触网。npm 启动会针对实际 launcher 包，使用全新的独立缓存和 `--prefer-online` 查询；直接下载的 GitHub Release 程序会从 GitHub 的 `releases/latest` 网页重定向读取稳定 tag。
 
-如果 GitHub 已发布新版本、但 npm 暂时还没有显示对应版本，FastCtx 会明确进入“等待 npm 同步”界面，而不是相信陈旧结果。每次 **重试** 都会再建一个独立缓存，不清理、也不修改用户原有 npm 缓存。网络、限流等瞬态失败保持安静，并记录在 **状态** 页面；发布元数据结构异常只警告一次。状态页面也提供绕过 24 小时缓存的手动检查。确认 npm 更新后只安装精确版本，并禁用生命周期脚本。GitHub Release 更新会下载本仓库对应平台的归档与汇总 `SHA256SUMS`，先校验归档，再安全解出二进制、执行版本探测并原子替换；重启健康检查失败会回滚。npm 更新失败会精确恢复先前包版本；任何更新事务失败都会重新打开旧版 TUI 并显示警告。更新成功后，由 FastCtx 拥有的 `~/.fastctx/bin/` 副本会同步更新，外部改写过的副本保持不动。
+如果 GitHub 已发布新版本、但 npm 暂时还没有显示对应版本，FastCtx 会明确进入“等待 npm 同步”界面，而不是相信陈旧结果。每次 **重试** 都会再建一个独立缓存，不清理、也不修改用户原有 npm 缓存。网络、限流等瞬态失败保持安静，并记录在 **状态** 页面；发布元数据结构异常只警告一次。状态页面也提供绕过 24 小时缓存的手动检查。确认 npm 更新后只安装精确版本，并禁用生命周期脚本。上游 CLI 的 GitHub Release 更新会下载上游项目对应平台的归档与汇总 `SHA256SUMS`，先校验归档，再安全解出二进制、执行版本探测并原子替换；重启健康检查失败会回滚。npm 更新失败会精确恢复先前包版本；任何更新事务失败都会重新打开旧版 TUI 并显示警告。更新成功后，由 FastCtx 拥有的 `~/.fastctx/bin/` 副本会同步更新，外部改写过的副本保持不动。
 
 `cargo install` 构建和内部 `~/.fastctx/bin/` runtime 不会自行更新。可设置 `FASTCTX_DISABLE_UPDATE_CHECK=1` 关闭 TUI 启动检查。
 
@@ -420,13 +423,13 @@ FastCtx 使用 `toml_edit` 修改已有 TOML，保留注释、格式和其他配
 
 FastCtx 采用 Apache License 2.0。
 
-再分发 FastCtx、将其内置进其他产品，或在其之上构建时，第 4(d) 条要求你在第三方声明通常出现的位置复现 [`NOTICE`](./NOTICE) 中的归属声明——对源码仓库而言，即你的 README。该声明标明来源 https://github.com/yc-duan/fastctx ，并写明你所做的改动是你自己的工作与你独自的责任，不代表本项目作者的认可，作者亦不承担由此产生的任何责任。第 4(b) 条另行要求你修改过的文件带有显著的修改声明。
+原始 FastCtx 的版权为 Copyright (c) 2026 yc-duan，依 Apache-2.0 使用；完整归属及免责声明保留在 [`NOTICE`](./NOTICE)。本版本的改动由本版本维护者负责，不代表上游作者的认可或支持。再分发时须保留适用的许可与声明，修改过的文件须带有显著的修改声明。
 
 内嵌 Pdfium 的第三方许可见 [`THIRD_PARTY_LICENSES.md`](./THIRD_PARTY_LICENSES.md)。
 
 ## 联系方式
 
-FastCtx 由 [yc-duan](https://github.com/yc-duan) 创建和维护。集成、再分发、合作或任何其他事宜，欢迎联系：dy2958830371@gmail.com。
+本 CodeyX 维护版本的问题请通过[本仓库](https://github.com/fraternity-z/fastctx/issues)联系 fraternity-z。原始 FastCtx 项目由 [yc-duan](https://github.com/yc-duan) 创建。
 
 ## 致谢
 

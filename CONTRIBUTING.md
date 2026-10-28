@@ -1,11 +1,12 @@
 # Contributing to FastCtx
 
-Thanks for your interest in FastCtx! Bug reports, feature requests, and pull
-requests are all welcome.
+This contribution guide is maintained by fraternity-z for the independent
+FastCtx version designed for CodeyX, derived from yc-duan/fastctx. Bug reports,
+feature requests, and focused pull requests for this version are welcome.
 
 ## Reporting issues
 
-Open an issue at <https://github.com/yc-duan/fastctx/issues>. For bugs, please
+Open an issue at <https://github.com/fraternity-z/fastctx/issues>. For bugs, please
 include the platform, the FastCtx version, and steps to reproduce.
 
 ## Development

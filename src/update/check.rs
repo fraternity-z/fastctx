@@ -1,4 +1,5 @@
 //! Installation-source detection, cached discovery, and classified update failures.
+//! Modified for fraternity-z/fastctx: use the independently maintained GitHub release channel.
 
 use super::cache::{self, CachedOutcome, CheckStatus};
 use super::model::{
@@ -21,8 +22,8 @@ use std::sync::mpsc;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use url::Url;
 
-const GITHUB_LATEST_URL: &str = "https://github.com/yc-duan/fastctx/releases/latest";
-const GITHUB_RELEASE_BASE: &str = "https://github.com/yc-duan/fastctx/releases/download";
+const GITHUB_LATEST_URL: &str = "https://github.com/fraternity-z/fastctx/releases/latest";
+const GITHUB_RELEASE_BASE: &str = "https://github.com/fraternity-z/fastctx/releases/download";
 const GITHUB_RELEASE_DISTRIBUTION: &str = "github-release";
 const NPM_QUERY_TIMEOUT: Duration = Duration::from_secs(8);
 const GITHUB_TIMEOUT: Duration = Duration::from_secs(6);
@@ -1524,7 +1525,7 @@ fn parse_latest_redirect(status: u16, location: Option<&str>) -> Result<Version,
         .ok_or_else(|| transient("GitHub latest-release redirect omitted its Location header"))?;
     let url = Url::parse(location)
         .map_err(|error| transient(format!("GitHub returned an invalid redirect URL: {error}")))?;
-    const TAG_PREFIX: &str = "/yc-duan/fastctx/releases/tag/";
+    const TAG_PREFIX: &str = "/fraternity-z/fastctx/releases/tag/";
     if url.scheme() != "https"
         || url.host_str() != Some("github.com")
         || url.query().is_some()
@@ -1534,7 +1535,7 @@ fn parse_latest_redirect(status: u16, location: Option<&str>) -> Result<Version,
         || !url.path().starts_with(TAG_PREFIX)
     {
         return Err(transient(
-            "GitHub latest-release redirect pointed outside yc-duan/fastctx",
+            "GitHub latest-release redirect pointed outside fraternity-z/fastctx",
         ));
     }
     let tag = &url.path()[TAG_PREFIX.len()..];
@@ -1647,6 +1648,40 @@ mod tests {
     use semver::Version;
 
     use std::time::{Duration, UNIX_EPOCH};
+
+    #[test]
+    fn github_discovery_and_plan_stay_in_the_maintained_repository() {
+        assert_eq!(
+            super::parse_latest_redirect(
+                302,
+                Some("https://github.com/fraternity-z/fastctx/releases/tag/v99.88.77"),
+            )
+            .unwrap(),
+            Version::new(99, 88, 77),
+        );
+        for redirect in [
+            "https://github.com/yc-duan/fastctx/releases/tag/v99.88.77",
+            "https://github.com/fraternity-z/fastctx-other/releases/tag/v99.88.77",
+            "http://github.com/fraternity-z/fastctx/releases/tag/v99.88.77",
+            "https://github.com.example.com/fraternity-z/fastctx/releases/tag/v99.88.77",
+        ] {
+            assert!(super::parse_latest_redirect(302, Some(redirect)).is_err());
+        }
+
+        let Some(crate::update::model::UpdatePlan::GithubRelease {
+            archive_url,
+            checksums_url,
+            archive_name,
+            ..
+        }) = super::github_update_plan("99.88.77")
+        else {
+            assert!(super::expected_release_archive_name().is_none());
+            return;
+        };
+        let base = "https://github.com/fraternity-z/fastctx/releases/download/v99.88.77";
+        assert_eq!(archive_url, format!("{base}/{archive_name}"));
+        assert_eq!(checksums_url, format!("{base}/SHA256SUMS"));
+    }
 
     #[test]
     fn official_version_authority_cannot_be_elevated_by_a_newer_mirror() {

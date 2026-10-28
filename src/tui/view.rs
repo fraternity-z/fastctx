@@ -1,4 +1,5 @@
 //! Adaptive ratatui views and the shared TUI theme.
+//! Modified for fraternity-z/fastctx: link to the maintained repository and issue tracker.
 
 use super::app::{App, Screen, StatusState};
 use super::budget_editor::{self, ToolBudgetInputError};
@@ -2464,11 +2465,11 @@ fn render_about(frame: &mut Frame<'_>, app: &App, area: Rect) {
         ),
         Line::raw(""),
         Line::styled(
-            "https://github.com/yc-duan/fastctx",
+            "https://github.com/fraternity-z/fastctx",
             Style::default().fg(theme::muted()),
         ),
         Line::styled(
-            "https://github.com/yc-duan/fastctx/issues",
+            "https://github.com/fraternity-z/fastctx/issues",
             Style::default().fg(theme::muted()),
         ),
         Line::styled("Apache-2.0", Style::default().fg(theme::muted())),
@@ -2999,11 +3000,11 @@ fn render_narrow_about(frame: &mut Frame<'_>, app: &mut App, area: Rect) {
                 Style::default().fg(theme::accent()),
             ),
             Line::styled(
-                "https://github.com/yc-duan/fastctx",
+                "https://github.com/fraternity-z/fastctx",
                 Style::default().fg(theme::fg()),
             ),
             Line::styled(
-                "https://github.com/yc-duan/fastctx/issues",
+                "https://github.com/fraternity-z/fastctx/issues",
                 Style::default().fg(theme::muted()),
             ),
             Line::styled("Apache-2.0", Style::default().fg(theme::muted())),
